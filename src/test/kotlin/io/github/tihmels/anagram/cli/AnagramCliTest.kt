@@ -1,4 +1,4 @@
-package dev.frtj.anagram.cli
+package io.github.tihmels.anagram.cli
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

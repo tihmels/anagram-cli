@@ -1,4 +1,4 @@
-package dev.frtj.anagram.domain
+package io.github.tihmels.anagram.domain
 
 /**
  * The canonical character multiset of a normalized text.
