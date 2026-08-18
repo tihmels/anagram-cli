@@ -84,18 +84,26 @@ of its own.
 A raw text is normalized by:
 
 1. **Unicode NFC composition**, so a decomposed and a precomposed spelling of the same character
-   compare equal (`cafe` + combining acute equals `café`).
+   compare equal (`cafe` + combining acute equals `café`). NFC also puts combining marks into
+   canonical order, so the order they were typed in does not matter.
 2. **Lowercasing with `Locale.ROOT`**, so results never depend on the machine's default locale.
-   A locale-sensitive lowercase would turn `I` into a dotless `ı` under a Turkish locale.
-3. **Keeping only Unicode letters and digits.** Whitespace, punctuation, symbols and any
-   combining marks that survive NFC composition are ignored.
+   A locale-sensitive lowercase would turn `I` into a dotless `ı` under a Turkish locale. NFC is
+   applied a second time afterwards, because case mapping can decompose what the first pass
+   composed.
+3. **Keeping letters, digits and combining marks.** Whitespace, punctuation and symbols are
+   ignored.
 4. **Iterating over code points, not UTF-16 chars**, so characters outside the Basic Multilingual
    Plane count as one character and never get split.
 
-Two consequences worth stating explicitly, because both are choices rather than facts:
+Three consequences worth stating explicitly, because all three are choices rather than facts:
 
 - **Diacritics are preserved.** `café` and `cafe` are *not* anagrams. Folding `é` onto `e` is a
   language-dependent decision this application does not make on the user's behalf.
+- **Combining marks are preserved.** In many scripts a mark is not decoration but part of the
+  character: dropping U+093E would make the Devanagari `का` indistinguishable from `क`, and an
+  accent with no precomposed form would silently fold `ạ̈` onto `ạ`. The cost of this choice is
+  that `İ` (U+0130) lowercases to `i` plus a combining dot that has no precomposed form, so `İ`
+  and `i` are different characters here.
 - **Digits are significant.** `abc12` and `abc123` are not anagrams.
 
 A text that contains no letter or digit at all carries no anagram information and is **rejected at
@@ -190,12 +198,12 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-46 tests, split by what they protect:
+54 tests, split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
-  digits, NFC composition, the diacritics decision, rejection of empty input, and Unicode handled
-  per code point (including a supplementary-plane letter and an ordering case that a char-wise
-  implementation would get wrong).
+  digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,
+  and Unicode handled per code point (including a supplementary-plane letter and an ordering case
+  that a char-wise implementation would get wrong).
 - `AnagramSessionTest` — the history semantics: both inputs recorded, transitive association, the
   scenario from the assignment, duplicates, self-exclusion, ordering and session isolation.
 - `AnagramCliTest` — the CLI driven end to end over in-memory streams. Most of these assert the

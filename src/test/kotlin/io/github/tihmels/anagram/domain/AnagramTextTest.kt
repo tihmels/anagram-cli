@@ -91,6 +91,49 @@ class AnagramTextTest {
     }
 
     @Nested
+    @DisplayName("combining marks are part of the character")
+    inner class CombiningMarks {
+
+        @Test
+        fun `keeps a spacing mark that changes the character`() {
+            // Devanagari KA (U+0915) and KA + VOWEL SIGN AA (U+093E). The vowel sign is a
+            // combining mark, not a letter, but dropping it would merge two different syllables.
+            val ka = "\u0915"
+            val kaa = "\u0915\u093E"
+            assertNotEquals(normalize(ka), normalize(kaa))
+            assertEquals(2, normalize(kaa).codePointCount(0, normalize(kaa).length))
+        }
+
+        @Test
+        fun `keeps an accent that has no precomposed form`() {
+            // a + dot below + diaeresis: NFC composes the dot below into U+1EA1, but no single
+            // code point carries both marks, so the diaeresis survives and must not be dropped.
+            val aWithTwoMarks = "a\u0323\u0308"
+            assertNotEquals(normalize(aWithTwoMarks), normalize("a\u0323"))
+        }
+
+        @Test
+        fun `puts combining marks into canonical order regardless of typing order`() {
+            // The two marks are typed in opposite orders; NFC orders them by combining class,
+            // so both spellings must produce the same canonical form.
+            assertEquals(normalize("a\u0323\u0308"), normalize("a\u0308\u0323"))
+        }
+
+        @Test
+        fun `treats a dotted capital I as distinct from a plain i`() {
+            // U+0130 lowercases to "i" + U+0307, which has no precomposed form. Keeping marks
+            // means the dot survives, so this is deliberately not the same character as "i".
+            assertNotEquals(normalize("\u0130"), normalize("i"))
+            assertEquals(2, normalize("\u0130").codePointCount(0, normalize("\u0130").length))
+        }
+
+        @Test
+        fun `still ignores punctuation next to marked characters`() {
+            assertEquals(normalize("\u0915\u093E"), normalize(" \u0915\u093E! "))
+        }
+    }
+
+    @Nested
     @DisplayName("Unicode is handled per code point")
     inner class CodePoints {
 
