@@ -8,12 +8,10 @@ import java.io.StringReader
 import java.io.StringWriter
 
 /**
- * Drives the CLI end to end through in-memory streams, so the interaction is verified without a
- * terminal and without a human typing.
+ * Drives the CLI end to end through in-memory streams.
  *
- * Several tests assert the complete transcript rather than a substring. That is deliberate: the
- * program's promise is that the same sequence of commands always produces the same output, and a
- * substring check would not notice a duplicated, reordered or missing line.
+ * Several tests assert the complete transcript rather than a substring, since a substring check
+ * would not notice a duplicated, reordered or missing line.
  */
 class AnagramCliTest {
 
@@ -47,7 +45,6 @@ class AnagramCliTest {
     @Test
     @DisplayName("reproduces the scenario from the assignment")
     fun `associates texts that were never compared with each other`() {
-        // f1(A, B), f1(A, C), f1(A, D) with A, B, D anagrams and C unrelated.
         val transcript = transcript(
             "compare", "listen", "silent",
             "compare", "listen", "banana",
@@ -63,15 +60,12 @@ class AnagramCliTest {
                 "> First text:  Second text: Anagrams: yes\n" +
                 "> First text:  Second text: Anagrams: no\n" +
                 "> First text:  Second text: Anagrams: yes\n" +
-                // f2(A) -> [B, D]
                 "> Text: 2 match(es):\n" +
                 "  - silent\n" +
                 "  - enlist\n" +
-                // f2(B) -> [A, D], although B and D were never compared directly
                 "> Text: 2 match(es):\n" +
                 "  - listen\n" +
                 "  - enlist\n" +
-                // f2(C) -> []
                 "> Text: No matches.\n" +
                 "> Bye.\n",
             transcript,
@@ -112,7 +106,6 @@ class AnagramCliTest {
 
         assertEquals(
             banner +
-                // The second text is not even asked for once the first one is rejected.
                 "> First text:  Rejected: a text must contain at least one letter or digit.\n" +
                 "> Text: Rejected: a text must contain at least one letter or digit.\n" +
                 "> Bye.\n",

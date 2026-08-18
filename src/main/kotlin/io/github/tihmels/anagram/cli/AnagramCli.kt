@@ -7,16 +7,7 @@ import java.io.Reader
 import java.io.Writer
 import java.util.Locale
 
-/**
- * The interactive adapter: it reads commands, renders results and reports rejected input.
- *
- * It owns no anagram logic — it never sees a signature and never inspects a normalized form.
- * Its only domain responsibility is to run raw console input through [AnagramText.of] so that
- * invalid text is turned away at the boundary and the session only ever holds valid values.
- *
- * The streams are constructor arguments rather than [System.in] and [System.out] so the whole
- * interaction can be driven from a test without a terminal.
- */
+/** The interactive command loop: reads commands, renders results, reports rejected input. */
 class AnagramCli(
     input: Reader,
     private val output: Writer,
@@ -24,7 +15,7 @@ class AnagramCli(
 ) {
     private val input = input.buffered()
 
-    /** Runs the command loop until the user quits or the input stream ends. */
+    /** Runs until the user quits or the input stream ends. */
     fun run() {
         emit(BANNER)
         var running = true

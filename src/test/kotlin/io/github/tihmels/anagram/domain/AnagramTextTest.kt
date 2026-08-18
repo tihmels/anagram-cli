@@ -12,11 +12,8 @@ import org.junit.jupiter.params.provider.ValueSource
 /**
  * Executable form of the normalization contract documented on [AnagramText].
  *
- * These tests are the reason the contract lives in one place: changing any rule below has to be a
- * deliberate act that breaks a named test, not a side effect of an edit somewhere in the CLI.
- *
- * The Unicode under test is written with explicit escapes, so that the intent of a test cannot be
- * altered by an editor silently re-normalizing the source file.
+ * The Unicode under test is written with explicit escapes so an editor can't silently
+ * re-normalize the source file and change what's being tested.
  */
 class AnagramTextTest {
 
@@ -31,8 +28,7 @@ class AnagramTextTest {
         @ValueSource(
             strings = [
                 "", "   ", "\t\n", "!?...", "--- ---", "€ £ $",
-                // Combining marks are significant, so these normalize to something non-empty.
-                // They are still modifiers with nothing of their own to modify.
+                // marks alone, with nothing to modify
                 "\u0301", "\u0301\u0308", " \u093E ",
             ],
         )
@@ -42,8 +38,7 @@ class AnagramTextTest {
 
         @Test
         fun `accepts a mark once it has a letter to modify`() {
-            // The mark alone is rejected above. Attached to a letter it is kept, and NFC
-            // composes the pair into the single code point U+00E1.
+            // NFC composes "a" + combining acute into the single code point U+00E1.
             assertEquals("\u00E1", normalize("a\u0301"))
             assertNotEquals(normalize("a"), normalize("a\u0301"))
         }
@@ -61,8 +56,7 @@ class AnagramTextTest {
 
         @Test
         fun `lowercases independently of the platform locale`() {
-            // Locale.ROOT rather than the default locale: under a Turkish default locale a
-            // locale-sensitive lowercase would turn "I" into a dotless "ı".
+            // Under a Turkish default locale, a locale-sensitive lowercase would turn "I" into "ı".
             assertEquals("i", normalize("I"))
             assertEquals("listen", normalize("LISTEN"))
         }
@@ -85,17 +79,16 @@ class AnagramTextTest {
 
         @Test
         fun `composes decomposed characters to NFC`() {
-            val precomposed = "caf\u00E9"      // e-acute as a single code point
-            val decomposed = "cafe\u0301"     // e followed by a combining acute accent
+            val precomposed = "caf\u00E9"  // e-acute as a single code point
+            val decomposed = "cafe\u0301"  // e followed by a combining acute accent
             assertEquals(normalize(precomposed), normalize(decomposed))
             assertEquals(4, normalize(decomposed).length, "the accent must compose, not be dropped")
         }
 
         @Test
         fun `composes across punctuation removed between a base character and its mark`() {
-            // The comma sits between the "e" and its accent and is discarded as punctuation.
-            // Composition must happen after that discard, not only before it, or the accent is
-            // left stuck to nothing while the same word typed without the comma composes fine.
+            // The comma between "e" and its accent is discarded as punctuation, so composition
+            // must run after that discard too, not only before it.
             val precomposed = "caf\u00E9"
             val commaBeforeMark = "cafe,\u0301"
             assertEquals(normalize(precomposed), normalize(commaBeforeMark))
@@ -103,7 +96,6 @@ class AnagramTextTest {
 
         @Test
         fun `keeps accented letters distinct from their unaccented counterparts`() {
-            // A documented decision, not an oversight: folding "é" onto "e" is language dependent.
             assertNotEquals(normalize("café"), normalize("cafe"))
         }
 
@@ -121,8 +113,7 @@ class AnagramTextTest {
 
         @Test
         fun `keeps a spacing mark that changes the character`() {
-            // Devanagari KA (U+0915) and KA + VOWEL SIGN AA (U+093E). The vowel sign is a
-            // combining mark, not a letter, but dropping it would merge two different syllables.
+            // Devanagari KA (U+0915) vs. KA + VOWEL SIGN AA (U+093E) \u2014 different syllables.
             val ka = "\u0915"
             val kaa = "\u0915\u093E"
             assertNotEquals(normalize(ka), normalize(kaa))
@@ -131,23 +122,21 @@ class AnagramTextTest {
 
         @Test
         fun `keeps an accent that has no precomposed form`() {
-            // a + dot below + diaeresis: NFC composes the dot below into U+1EA1, but no single
-            // code point carries both marks, so the diaeresis survives and must not be dropped.
+            // NFC composes "a" + dot-below into U+1EA1, but no code point also carries the
+            // diaeresis, so it must survive uncomposed rather than being dropped.
             val aWithTwoMarks = "a\u0323\u0308"
             assertNotEquals(normalize(aWithTwoMarks), normalize("a\u0323"))
         }
 
         @Test
         fun `puts combining marks into canonical order regardless of typing order`() {
-            // The two marks are typed in opposite orders; NFC orders them by combining class,
-            // so both spellings must produce the same canonical form.
+            // Same two marks, typed in opposite orders; NFC orders them by combining class.
             assertEquals(normalize("a\u0323\u0308"), normalize("a\u0308\u0323"))
         }
 
         @Test
         fun `treats a dotted capital I as distinct from a plain i`() {
-            // U+0130 lowercases to "i" + U+0307, which has no precomposed form. Keeping marks
-            // means the dot survives, so this is deliberately not the same character as "i".
+            // U+0130 lowercases to "i" + U+0307, which has no precomposed form, so the dot survives.
             assertNotEquals(normalize("\u0130"), normalize("i"))
             assertEquals(2, normalize("\u0130").codePointCount(0, normalize("\u0130").length))
         }
@@ -159,9 +148,8 @@ class AnagramTextTest {
 
         @Test
         fun `a mark does not count as an anagram of a mark on a different character`() {
-            // KA+AA, KHA+E ("\u0915\u093E\u0916\u0947") vs. the same two marks attached to the
-            // other consonant ("\u0915\u0947\u0916\u093E"). Same four code points, but the pairing
-            // between mark and base has changed, so these are not the same characters rearranged.
+            // Same four code points as KA+AA, KHA+E, but with the two marks swapped onto the
+            // other consonant \u2014 the pairing between mark and base has changed.
             val kaAaKhaE = AnagramText.of("\u0915\u093E\u0916\u0947")!!
             val kaEKhaAa = AnagramText.of("\u0915\u0947\u0916\u093E")!!
             assertNotEquals(
@@ -176,8 +164,7 @@ class AnagramTextTest {
     @DisplayName("Unicode is handled per code point")
     inner class CodePoints {
 
-        // A cased Deseret letter pair outside the Basic Multilingual Plane: one code point each,
-        // but two UTF-16 chars, so char-wise handling would be observably wrong.
+        // Deseret letters outside the Basic Multilingual Plane: one code point, two UTF-16 chars.
         private val deseretLongICapital = "\uD801\uDC00"  // U+10400
         private val deseretLongISmall = "\uD801\uDC28"    // U+10428
         private val deseretLongESmall = "\uD801\uDC29"    // U+10429
@@ -201,8 +188,7 @@ class AnagramTextTest {
 
         @Test
         fun `orders characters by code point, not by UTF-16 char`() {
-            // U+FF41 sorts after U+10428 by code point, but before its high surrogate U+D801 by
-            // UTF-16 char. A char-wise canonical form would therefore mis-order one of these.
+            // U+FF41 sorts after U+10428 by code point, but before its high surrogate U+D801 by char.
             val fullwidthA = "\uFF41"  // U+FF41
             val first = AnagramText.of(fullwidthA + deseretLongISmall)!!
             val second = AnagramText.of(deseretLongISmall + fullwidthA)!!
