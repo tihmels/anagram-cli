@@ -91,7 +91,9 @@ A raw text is normalized by:
    applied a second time afterwards, because case mapping can decompose what the first pass
    composed.
 3. **Keeping letters, digits and combining marks.** Whitespace, punctuation and symbols are
-   ignored.
+   ignored, and NFC composes once more after they are discarded — a mark separated from its base
+   by punctuation (`cafe,´`) has to end up composed the same as one with nothing in between
+   (`café`), since the punctuation between them was never meant to matter.
 4. **Iterating over code points, not UTF-16 chars**, so characters outside the Basic Multilingual
    Plane count as one character and never get split.
 

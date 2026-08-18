@@ -92,6 +92,16 @@ class AnagramTextTest {
         }
 
         @Test
+        fun `composes across punctuation removed between a base character and its mark`() {
+            // The comma sits between the "e" and its accent and is discarded as punctuation.
+            // Composition must happen after that discard, not only before it, or the accent is
+            // left stuck to nothing while the same word typed without the comma composes fine.
+            val precomposed = "caf\u00E9"
+            val commaBeforeMark = "cafe,\u0301"
+            assertEquals(normalize(precomposed), normalize(commaBeforeMark))
+        }
+
+        @Test
         fun `keeps accented letters distinct from their unaccented counterparts`() {
             // A documented decision, not an oversight: folding "é" onto "e" is language dependent.
             assertNotEquals(normalize("café"), normalize("cafe"))

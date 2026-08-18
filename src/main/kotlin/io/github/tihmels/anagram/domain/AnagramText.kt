@@ -52,7 +52,12 @@ class AnagramText private constructor(
             cased.codePoints()
                 .filter(::isSignificant)
                 .forEach(canonical::appendCodePoint)
-            return canonical.toString()
+
+            // A third pass: discarding punctuation can leave a base character and a mark that
+            // would compose adjacent for the first time, e.g. "cafe,́" only becomes "café"
+            // once the comma between the "e" and the accent is gone. Without this, that mark is
+            // stuck uncomposed while the same accent typed with no comma in the way is not.
+            return Normalizer.normalize(canonical.toString(), Normalizer.Form.NFC)
         }
 
         // Marks are kept although they are not letters: in many scripts they are part of the
