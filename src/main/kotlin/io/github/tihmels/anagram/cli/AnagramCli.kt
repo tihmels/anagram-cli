@@ -7,7 +7,6 @@ import java.io.Reader
 import java.io.Writer
 import java.util.Locale
 
-/** The interactive command loop: reads commands, renders results, reports rejected input. */
 class AnagramCli(
     input: Reader,
     private val output: Writer,
@@ -15,7 +14,6 @@ class AnagramCli(
 ) {
     private val input = input.buffered()
 
-    /** Runs until the user quits or the input stream ends. */
     fun run() {
         emit(BANNER)
         var running = true

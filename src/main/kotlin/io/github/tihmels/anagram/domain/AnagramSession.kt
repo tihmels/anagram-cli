@@ -1,11 +1,10 @@
 package io.github.tihmels.anagram.domain
 
-/** The in-memory history of one interactive run. Not thread-safe. */
 class AnagramSession {
 
     private val bySignature = HashMap<AnagramSignature, LinkedHashSet<AnagramText>>()
 
-    /** Records both texts and reports how they relate. */
+    /** Records both [first] and [second], regardless of whether they compare as anagrams. */
     fun compareAndRecord(first: AnagramText, second: AnagramText): ComparisonResult {
         record(first)
         record(second)

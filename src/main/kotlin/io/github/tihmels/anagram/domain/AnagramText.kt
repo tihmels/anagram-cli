@@ -11,7 +11,6 @@ import java.util.Locale
  * the README for the full contract and the reasoning behind each rule.
  */
 class AnagramText private constructor(
-    /** The text as first entered, whitespace-trimmed. Used for display only. */
     val display: String,
     internal val normalized: String,
 ) {
