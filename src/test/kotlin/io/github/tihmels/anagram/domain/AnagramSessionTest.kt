@@ -1,8 +1,6 @@
 package io.github.tihmels.anagram.domain
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -16,7 +14,7 @@ class AnagramSessionTest {
 
     private fun text(raw: String): AnagramText = AnagramText.of(raw) ?: error("unexpectedly rejected: '$raw'")
 
-    private fun compare(first: String, second: String): Boolean =
+    private fun compare(first: String, second: String): ComparisonResult =
         session.compareAndRecord(text(first), text(second))
 
     private fun find(query: String): List<String> =
@@ -28,28 +26,40 @@ class AnagramSessionTest {
 
         @Test
         fun `recognises a plain anagram`() {
-            assertTrue(compare("listen", "silent"))
+            assertEquals(ComparisonResult.ANAGRAMS, compare("listen", "silent"))
         }
 
         @Test
         fun `rejects texts that are not anagrams`() {
-            assertFalse(compare("listen", "banana"))
+            assertEquals(ComparisonResult.NOT_ANAGRAMS, compare("listen", "banana"))
         }
 
         @Test
         fun `ignores case, whitespace and punctuation`() {
-            assertTrue(compare("Dormitory", "Dirty Room!"))
+            assertEquals(ComparisonResult.ANAGRAMS, compare("Dormitory", "Dirty Room!"))
         }
 
         @Test
         fun `counts repeated characters rather than distinct ones`() {
             // "aab" and "abb" use the same letters but not the same number of them.
-            assertFalse(compare("aab", "abb"))
+            assertEquals(ComparisonResult.NOT_ANAGRAMS, compare("aab", "abb"))
         }
 
         @Test
-        fun `a text is an anagram of itself`() {
-            assertTrue(compare("listen", "Listen!"))
+        fun `a text is not an anagram of itself`() {
+            // An anagram rearranges a *different* text. Same characters, nothing rearranged.
+            assertEquals(ComparisonResult.SAME_TEXT, compare("listen", "listen"))
+        }
+
+        @Test
+        fun `sameness is judged on the normalized form, not the spelling`() {
+            assertEquals(ComparisonResult.SAME_TEXT, compare("listen", "  LISTEN!  "))
+        }
+
+        @Test
+        fun `a reordering of a text is still an anagram of it`() {
+            // The boundary case: same characters, different arrangement.
+            assertEquals(ComparisonResult.ANAGRAMS, compare("abc", "cba"))
         }
     }
 

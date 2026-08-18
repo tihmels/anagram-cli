@@ -106,6 +106,24 @@ Two texts are anagrams when their normalized code points, sorted, are equal. Tha
 the *signature*, and grouping the history by it is what turns feature 2 into a lookup rather than
 a scan over every stored text.
 
+### A text is not an anagram of itself
+
+An anagram rearranges the letters of a *different* word or phrase, so equal characters alone are
+not enough — something has to have been rearranged. `compare` therefore reports three outcomes
+rather than a yes/no:
+
+```
+compare(listen, silent)   ->  Anagrams: yes
+compare(listen, Listen!)  ->  Anagrams: no — both inputs are the same text
+compare(listen, banana)   ->  Anagrams: no
+```
+
+Sameness is judged on the normalized form, so `listen` and `LISTEN!` count as the same text. This
+is the same rule feature 2 applies when it excludes the query from its own results; a `compare`
+that answered "yes" here while `find` refused to list the text would be contradicting itself.
+Keeping the "same text" case as its own outcome rather than folding it into `false` means the
+caller can say *why* the answer was no.
+
 ## History semantics
 
 The assignment leaves duplicates and ordering open. The choices made here, all of them covered by
@@ -118,6 +136,7 @@ tests:
 | Repeated inputs | A text is recorded once per normalized form, so repeating a comparison never multiplies later results. |
 | Which spelling comes back? | The first one seen. Entering `Listen` and later `listen` reports `Listen`. |
 | Does a query match itself? | No. Self-exclusion compares normalized forms, so `LISTEN!` will not return `listen`. |
+| Is a text an anagram of itself? | No. `compare` reports it as the same text, matching feature 2's self-exclusion. |
 | Result order | First-seen order, so the same sequence of commands always produces the same output. |
 
 ## Architecture
