@@ -202,14 +202,17 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-59 tests, split by what they protect:
+67 tests, split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
   digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,
   and Unicode handled per code point (including a supplementary-plane letter and an ordering case
   that a char-wise implementation would get wrong).
 - `AnagramSessionTest` — the history semantics: both inputs recorded, transitive association, the
-  scenario from the assignment, duplicates, self-exclusion, ordering and session isolation.
+  scenario from the assignment, duplicates, self-exclusion, ordering and session isolation — plus a
+  set of anagram pairs quoted directly from the
+  [Wikipedia definition](https://en.wikipedia.org/wiki/Anagram) this program follows, covering
+  multi-word phrases and punctuation the normalization contract has to see through.
 - `AnagramCliTest` — the CLI driven end to end over in-memory streams. Most of these assert the
   **complete transcript** rather than a substring, because the program's promise is deterministic
   output and a substring check would not notice a duplicated, reordered or missing line.

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 /**
  * Executable form of the state semantics documented on [AnagramSession].
@@ -60,6 +62,33 @@ class AnagramSessionTest {
         fun `a reordering of a text is still an anagram of it`() {
             // The boundary case: same characters, different arrangement.
             assertEquals(ComparisonResult.ANAGRAMS, compare("abc", "cba"))
+        }
+    }
+
+    @Nested
+    @DisplayName("examples taken from the Wikipedia definition of anagram")
+    inner class WikipediaExamples {
+
+        // en.wikipedia.org/wiki/Anagram, opening definition: "a word or phrase formed by
+        // rearranging the letters of a different word or phrase using all the original letters
+        // exactly once." These pairs are quoted from the article's own list of anagrams, chosen to
+        // cover single words, multi-word phrases, and punctuation the normalization contract must
+        // see through (an apostrophe, a hyphen).
+        @ParameterizedTest(name = "{0} <-> {1}")
+        @CsvSource(
+            value = [
+                "evil, vile",
+                "a gentleman, elegant man",
+                "eleven plus two, twelve plus one",
+                "Santa, Satan",
+                "William Shakespeare, I am a weakish speller",
+                "New York Times, monkeys write",
+                "Church of Scientology, rich-chosen goofy cult",
+                "McDonald's restaurants, Uncle Sam's standard rot",
+            ],
+        )
+        fun `is recognised as an anagram`(first: String, second: String) {
+            assertEquals(ComparisonResult.ANAGRAMS, compare(first, second))
         }
     }
 
