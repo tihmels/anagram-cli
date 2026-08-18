@@ -35,14 +35,13 @@ class AnagramText private constructor(
             val composed = Normalizer.normalize(raw, Normalizer.Form.NFC)
             val cased = Normalizer.normalize(composed.lowercase(Locale.ROOT), Normalizer.Form.NFC)
 
-            val canonical = StringBuilder(cased.length)
-            cased.codePoints()
-                .filter(::isSignificant)
-                .forEach(canonical::appendCodePoint)
+            val canonical = buildString {
+                cased.codePoints().filter(::isSignificant).forEach(::appendCodePoint)
+            }
 
             // Discarding punctuation can newly place a base character and a mark next to
             // each other, so composition needs a pass after the filter too, not just before it.
-            return Normalizer.normalize(canonical.toString(), Normalizer.Form.NFC)
+            return Normalizer.normalize(canonical, Normalizer.Form.NFC)
         }
 
         private fun isSignificant(codePoint: Int): Boolean =
