@@ -1,7 +1,7 @@
-package dev.frtj.anagram.cli
+package io.github.tihmels.anagram.cli
 
-import dev.frtj.anagram.domain.AnagramSession
-import dev.frtj.anagram.domain.AnagramText
+import io.github.tihmels.anagram.domain.AnagramSession
+import io.github.tihmels.anagram.domain.AnagramText
 import java.io.Reader
 import java.io.Writer
 import java.util.Locale

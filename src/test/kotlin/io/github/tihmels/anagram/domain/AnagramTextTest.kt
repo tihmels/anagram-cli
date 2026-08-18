@@ -1,4 +1,4 @@
-package dev.frtj.anagram.domain
+package io.github.tihmels.anagram.domain
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals

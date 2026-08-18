@@ -123,7 +123,7 @@ tests:
 ## Architecture
 
 ```
-dev.frtj.anagram
+io.github.tihmels.anagram
 ├── domain
 │   ├── AnagramText       validated input: the normalization contract, applied once
 │   ├── AnagramSignature  canonical character multiset; the lookup key

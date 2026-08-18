@@ -1,6 +1,6 @@
 @file:JvmName("AnagramApplication")
 
-package dev.frtj.anagram.cli
+package io.github.tihmels.anagram.cli
 
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter

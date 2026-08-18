@@ -1,4 +1,4 @@
-package dev.frtj.anagram.domain
+package io.github.tihmels.anagram.domain
 
 /**
  * The in-memory history of one program run, and the two operations the assignment asks for.
