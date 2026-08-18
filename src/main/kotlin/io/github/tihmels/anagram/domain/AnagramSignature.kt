@@ -3,9 +3,11 @@ package io.github.tihmels.anagram.domain
 /**
  * The canonical character multiset of a normalized text.
  *
- * Two texts are anagrams of each other exactly when their signatures are equal, which makes the
- * signature usable as a lookup key: grouping by it answers "which texts are anagrams of this
- * one" without comparing the query against every stored text.
+ * Two texts share a signature exactly when they use the same characters the same number of times.
+ * That is a statement about characters, not a verdict: whether the texts are *anagrams* is a
+ * domain question, and [AnagramSession] additionally requires them to be different texts. Equal
+ * signatures make the value usable as a lookup key, so grouping by it answers "which texts use
+ * these characters" without comparing the query against every stored text.
  *
  * The representation is the normalized code points in ascending order. Sorting is the simplest
  * canonical form whose correctness is self-evident; a frequency map would need a defined

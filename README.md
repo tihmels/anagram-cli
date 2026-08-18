@@ -107,7 +107,8 @@ Three consequences worth stating explicitly, because all three are choices rathe
 - **Digits are significant.** `abc12` and `abc123` are not anagrams.
 
 A text that contains no letter or digit at all carries no anagram information and is **rejected at
-the boundary**. The CLI reports it and carries on; the domain therefore only ever holds values
+the boundary** — including one made only of combining marks, which normalizes to something
+non-empty but has nothing of its own to modify. The CLI reports it and carries on; the domain therefore only ever holds values
 that are already valid and never has to defend itself against impossible input.
 
 Two texts are anagrams when their normalized code points, sorted, are equal. That sorted form is
@@ -198,7 +199,7 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-54 tests, split by what they protect:
+58 tests, split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
   digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,

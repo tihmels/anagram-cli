@@ -28,9 +28,24 @@ class AnagramTextTest {
     inner class Rejection {
 
         @ParameterizedTest(name = "rejects [{0}]")
-        @ValueSource(strings = ["", "   ", "\t\n", "!?...", "--- ---", "€ £ $"])
+        @ValueSource(
+            strings = [
+                "", "   ", "\t\n", "!?...", "--- ---", "€ £ $",
+                // Combining marks are significant, so these normalize to something non-empty.
+                // They are still modifiers with nothing of their own to modify.
+                "\u0301", "\u0301\u0308", " \u093E ",
+            ],
+        )
         fun `rejects input that normalizes to nothing`(raw: String) {
             assertNull(AnagramText.of(raw))
+        }
+
+        @Test
+        fun `accepts a mark once it has a letter to modify`() {
+            // The mark alone is rejected above. Attached to a letter it is kept, and NFC
+            // composes the pair into the single code point U+00E1.
+            assertEquals("\u00E1", normalize("a\u0301"))
+            assertNotEquals(normalize("a"), normalize("a\u0301"))
         }
 
         @Test
