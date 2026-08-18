@@ -61,7 +61,8 @@ io.github.tihmels.anagram
   read `normalized` or touch `AnagramSignature`.
 - **The domain owns no I/O.** `AnagramCli` takes a `Reader` and `Writer` by constructor — keep it
   that way so tests never need a terminal.
-- `AnagramSignature` is `internal`. Keep it that way.
+- `AnagramSignature` and `AnagramText.normalized` are `internal`. Keep them that way: they are
+  representations, and a public one invites a second, divergent notion of "same text".
 - Feature 1 records *both* inputs regardless of outcome; feature 2 is a pure read and must never
   record its query. These two rules are the whole point of the exercise.
 - CLI output is asserted as complete transcripts. Changing any prompt or message means updating

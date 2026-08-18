@@ -27,13 +27,19 @@ import java.util.Locale
  * precomposed form, so it is not the same character as a plain `i`. That falls out of keeping
  * marks rather than discarding them, and is covered by a test.
  *
- * A text whose normalized form is empty carries no anagram information and is rejected.
+ * A text that carries no letter or digit of its own holds no anagram information and is rejected.
  */
 class AnagramText private constructor(
     /** The text as first entered, whitespace-trimmed. Used for display only. */
     val display: String,
-    /** The canonical form. Two texts are considered the same input when these are equal. */
-    val normalized: String,
+    /**
+     * The canonical form. Two texts are considered the same input when these are equal.
+     *
+     * Internal on purpose: it is a representation, not part of the text's public identity. Callers
+     * compare [AnagramText] values instead, so no one can grow a second, divergent notion of
+     * "same text" outside this class.
+     */
+    internal val normalized: String,
 ) {
     internal val signature: AnagramSignature = AnagramSignature.of(normalized)
 
@@ -52,7 +58,11 @@ class AnagramText private constructor(
          */
         fun of(raw: String): AnagramText? {
             val normalized = normalize(raw)
-            return if (normalized.isEmpty()) null else AnagramText(raw.trim(), normalized)
+            // Emptiness is not the only rejection case. Combining marks are significant, so a
+            // text made only of marks normalizes to something non-empty while still being a
+            // modifier with nothing to modify. Require a letter or digit of its own.
+            if (normalized.codePoints().noneMatch(Character::isLetterOrDigit)) return null
+            return AnagramText(raw.trim(), normalized)
         }
 
         private fun normalize(raw: String): String {

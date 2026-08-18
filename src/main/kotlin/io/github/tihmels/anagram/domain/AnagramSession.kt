@@ -23,8 +23,17 @@ package io.github.tihmels.anagram.domain
  */
 class AnagramSession {
 
-    private val recordedForms = HashSet<String>()
-    private val bySignature = HashMap<AnagramSignature, MutableList<AnagramText>>()
+    /**
+     * Every recorded text, grouped by signature.
+     *
+     * One collection carries both rules, so there is no second structure to keep in step with
+     * this one. [AnagramText] equality is equality of the normalized form, so a repeat is turned
+     * away by the set it lands in — and because equal normalized forms always produce equal
+     * signatures, a repeat can never end up in a *different* group and slip past that check.
+     * [LinkedHashSet] keeps the first-seen instance on a repeat instead of replacing it, which is
+     * what preserves the first-seen spelling, and preserves insertion order for the results.
+     */
+    private val bySignature = HashMap<AnagramSignature, LinkedHashSet<AnagramText>>()
 
     /**
      * Feature #1 — compares [first] and [second] and records both texts in the session history,
@@ -55,8 +64,6 @@ class AnagramSession {
             .filter { it != query }
 
     private fun record(text: AnagramText) {
-        if (recordedForms.add(text.normalized)) {
-            bySignature.getOrPut(text.signature) { mutableListOf() }.add(text)
-        }
+        bySignature.getOrPut(text.signature) { LinkedHashSet() }.add(text)
     }
 }
