@@ -94,6 +94,19 @@ class AnagramCliTest {
     }
 
     @Test
+    fun `distinguishes the same text from a genuine mismatch`() {
+        val transcript = transcript("compare", "listen", "Listen!", "compare", "listen", "banana", "quit")
+
+        assertEquals(
+            banner +
+                "> First text:  Second text: Anagrams: no \u2014 both inputs are the same text\n" +
+                "> First text:  Second text: Anagrams: no\n" +
+                "> Bye.\n",
+            transcript,
+        )
+    }
+
+    @Test
     fun `reports rejected input and keeps running`() {
         val transcript = transcript("compare", "!!!", "find", "   ", "quit")
 

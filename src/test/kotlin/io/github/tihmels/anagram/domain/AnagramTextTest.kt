@@ -3,7 +3,6 @@ package io.github.tihmels.anagram.domain
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -125,7 +124,8 @@ class AnagramTextTest {
             val fullwidthA = "\uFF41"  // U+FF41
             val first = AnagramText.of(fullwidthA + deseretLongISmall)!!
             val second = AnagramText.of(deseretLongISmall + fullwidthA)!!
-            assertTrue(
+            assertEquals(
+                ComparisonResult.ANAGRAMS,
                 AnagramSession().compareAndRecord(first, second),
                 "reordered code points must still be anagrams",
             )

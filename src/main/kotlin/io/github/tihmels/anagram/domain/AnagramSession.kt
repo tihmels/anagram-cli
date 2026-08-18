@@ -27,13 +27,22 @@ class AnagramSession {
     private val bySignature = HashMap<AnagramSignature, MutableList<AnagramText>>()
 
     /**
-     * Feature #1 — reports whether [first] and [second] are anagrams and records both texts in
-     * the session history, independently of the answer.
+     * Feature #1 — compares [first] and [second] and records both texts in the session history,
+     * independently of the answer.
+     *
+     * Two texts that normalize to the same value are reported as [ComparisonResult.SAME_TEXT]
+     * rather than as anagrams: an anagram rearranges the letters of a *different* text, and
+     * nothing was rearranged here. This is the same rule [findAnagrams] applies when it excludes
+     * the query from its own results.
      */
-    fun compareAndRecord(first: AnagramText, second: AnagramText): Boolean {
+    fun compareAndRecord(first: AnagramText, second: AnagramText): ComparisonResult {
         record(first)
         record(second)
-        return first.signature == second.signature
+        return when {
+            first == second -> ComparisonResult.SAME_TEXT
+            first.signature == second.signature -> ComparisonResult.ANAGRAMS
+            else -> ComparisonResult.NOT_ANAGRAMS
+        }
     }
 
     /**

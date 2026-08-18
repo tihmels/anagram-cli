@@ -2,6 +2,7 @@ package io.github.tihmels.anagram.cli
 
 import io.github.tihmels.anagram.domain.AnagramSession
 import io.github.tihmels.anagram.domain.AnagramText
+import io.github.tihmels.anagram.domain.ComparisonResult
 import java.io.Reader
 import java.io.Writer
 import java.util.Locale
@@ -63,7 +64,13 @@ class AnagramCli(
             return true
         }
 
-        emit(if (session.compareAndRecord(first, second)) "Anagrams: yes" else "Anagrams: no")
+        emit(
+            when (session.compareAndRecord(first, second)) {
+                ComparisonResult.ANAGRAMS -> "Anagrams: yes"
+                ComparisonResult.SAME_TEXT -> "Anagrams: no — both inputs are the same text"
+                ComparisonResult.NOT_ANAGRAMS -> "Anagrams: no"
+            },
+        )
         return true
     }
 
