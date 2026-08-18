@@ -146,6 +146,20 @@ class AnagramTextTest {
         fun `still ignores punctuation next to marked characters`() {
             assertEquals(normalize("\u0915\u093E"), normalize(" \u0915\u093E! "))
         }
+
+        @Test
+        fun `a mark does not count as an anagram of a mark on a different character`() {
+            // KA+AA, KHA+E ("\u0915\u093E\u0916\u0947") vs. the same two marks attached to the
+            // other consonant ("\u0915\u0947\u0916\u093E"). Same four code points, but the pairing
+            // between mark and base has changed, so these are not the same characters rearranged.
+            val kaAaKhaE = AnagramText.of("\u0915\u093E\u0916\u0947")!!
+            val kaEKhaAa = AnagramText.of("\u0915\u0947\u0916\u093E")!!
+            assertNotEquals(
+                ComparisonResult.ANAGRAMS,
+                AnagramSession().compareAndRecord(kaAaKhaE, kaEKhaAa),
+                "a mark moving to a different base character must not be reported as a reordering",
+            )
+        }
     }
 
     @Nested

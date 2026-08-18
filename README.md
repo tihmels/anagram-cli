@@ -111,9 +111,12 @@ the boundary** — including one made only of combining marks, which normalizes 
 non-empty but has nothing of its own to modify. The CLI reports it and carries on; the domain therefore only ever holds values
 that are already valid and never has to defend itself against impossible input.
 
-Two texts are anagrams when their normalized code points, sorted, are equal. That sorted form is
-the *signature*, and grouping the history by it is what turns feature 2 into a lookup rather than
-a scan over every stored text.
+Two texts are anagrams when their normalized characters, sorted, are equal — where a character is
+a base letter or digit together with any combining marks attached to it, not a bare code point.
+Sorting code points individually would let a mark drift from one base character onto another and
+call that a mere reordering, when the mark moving is what actually changed the text. That sorted
+form is the *signature*, and grouping the history by it is what turns feature 2 into a lookup
+rather than a scan over every stored text.
 
 ### A text is not an anagram of itself
 
@@ -177,7 +180,7 @@ None of them would solve a problem this program has.
 
 ## Trade-offs
 
-- **Sorted code points over a frequency map.** Both are valid canonical forms. Sorting is the one
+- **Sorted characters over a frequency map.** Both are valid canonical forms. Sorting is the one
   whose correctness is obvious at a glance, and a frequency map would need a defined iteration
   order before it could serve as a reliable map key. For texts of realistic length the difference
   in cost is not worth the loss of clarity.
@@ -199,7 +202,7 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-58 tests, split by what they protect:
+59 tests, split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
   digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,
