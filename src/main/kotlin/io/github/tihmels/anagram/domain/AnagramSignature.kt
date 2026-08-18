@@ -14,26 +14,23 @@ import java.util.Locale
 internal value class AnagramSignature private constructor(private val sortedClusters: String) {
 
     companion object {
-        private const val CLUSTER_SEPARATOR = ' '
+        private const val CLUSTER_SEPARATOR = " "
 
         /** @param normalized a text already put through the [AnagramText] normalization contract. */
         fun of(normalized: String): AnagramSignature {
-            val key = graphemeClusters(normalized).sorted().joinToString(CLUSTER_SEPARATOR.toString())
+            val key = graphemeClusters(normalized).sorted().joinToString(CLUSTER_SEPARATOR)
             return AnagramSignature(key)
         }
 
-        private fun graphemeClusters(text: String): List<String> {
-            val boundaries = BreakIterator.getCharacterInstance(Locale.ROOT)
-            boundaries.setText(text)
-            val clusters = mutableListOf<String>()
+        private fun graphemeClusters(text: String): List<String> = buildList {
+            val boundaries = BreakIterator.getCharacterInstance(Locale.ROOT).apply { setText(text) }
             var start = boundaries.first()
             var end = boundaries.next()
             while (end != BreakIterator.DONE) {
-                clusters += text.substring(start, end)
+                add(text.substring(start, end))
                 start = end
                 end = boundaries.next()
             }
-            return clusters
         }
     }
 }
