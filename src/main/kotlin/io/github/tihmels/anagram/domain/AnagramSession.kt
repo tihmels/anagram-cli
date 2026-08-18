@@ -3,46 +3,21 @@ package io.github.tihmels.anagram.domain
 /**
  * The in-memory history of one program run, and the two operations the assignment asks for.
  *
- * State semantics, all of them deliberate rather than inherited from a collection type:
- *
- *  - **What is stored:** every text handed to [compareAndRecord], whether or not the two texts
- *    turned out to be anagrams. That is what makes the transitive case work: two texts that were
- *    never directly compared still find each other through their shared signature.
- *  - **When it is stored:** only [compareAndRecord] writes. [findAnagrams] is a pure read, so a
- *    lookup can be repeated or run against a text that was never entered without changing the
- *    history.
- *  - **Duplicates:** a text is recorded once per normalized form. Re-entering the same text —
- *    or the same text in different spelling or casing — does not multiply later results, and the
- *    first-seen spelling is the one that is reported back.
- *  - **Self-exclusion:** [findAnagrams] never returns the query itself, compared by normalized
- *    form rather than by the entered spelling.
- *  - **Ordering:** matches come back in the order they were first recorded, so the same sequence
- *    of commands always produces the same output.
- *
  * Not thread-safe: one session belongs to one interactive run.
  */
 class AnagramSession {
 
-    /**
-     * Every recorded text, grouped by signature.
-     *
-     * One collection carries both rules, so there is no second structure to keep in step with
-     * this one. [AnagramText] equality is equality of the normalized form, so a repeat is turned
-     * away by the set it lands in — and because equal normalized forms always produce equal
-     * signatures, a repeat can never end up in a *different* group and slip past that check.
-     * [LinkedHashSet] keeps the first-seen instance on a repeat instead of replacing it, which is
-     * what preserves the first-seen spelling, and preserves insertion order for the results.
-     */
+    // Equal normalized forms always produce equal signatures, so a repeated text can never land in
+    // a different group and slip past the set. LinkedHashSet keeps the first-seen instance instead
+    // of replacing it, which is what preserves the first-seen spelling and the result order.
     private val bySignature = HashMap<AnagramSignature, LinkedHashSet<AnagramText>>()
 
     /**
-     * Feature #1 — compares [first] and [second] and records both texts in the session history,
-     * independently of the answer.
+     * Feature #1 — records both texts, whatever the answer, and reports how they relate.
      *
-     * Two texts that normalize to the same value are reported as [ComparisonResult.SAME_TEXT]
-     * rather than as anagrams: an anagram rearranges the letters of a *different* text, and
-     * nothing was rearranged here. This is the same rule [findAnagrams] applies when it excludes
-     * the query from its own results.
+     * Texts that normalize to the same value are [ComparisonResult.SAME_TEXT] rather than
+     * anagrams, since an anagram rearranges a *different* text. [findAnagrams] applies the same
+     * rule when it excludes the query from its own results.
      */
     fun compareAndRecord(first: AnagramText, second: AnagramText): ComparisonResult {
         record(first)
@@ -55,8 +30,8 @@ class AnagramSession {
     }
 
     /**
-     * Feature #2 — all previously recorded texts that are anagrams of [query], excluding [query]
-     * itself, in first-seen order. Does not record [query].
+     * Feature #2 — recorded texts that are anagrams of [query], in first-seen order, excluding
+     * [query] itself. A pure read: it does not record [query].
      */
     fun findAnagrams(query: AnagramText): List<AnagramText> =
         bySignature[query.signature]

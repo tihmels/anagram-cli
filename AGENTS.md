@@ -75,24 +75,11 @@ io.github.tihmels.anagram
 - Do not add abstraction layers (repositories, use cases, ports/adapters) without a concrete
   problem they solve.
 - Do not edit `target/` — it is generated and gitignored.
-- Do not add a LICENSE without asking; the repo is deliberately unlicensed for now.
 - Keep the README's normalization and history-semantics sections in sync with the code. They are
   the submission's contract, not decoration.
 
 ## Git workflow
 
 - Conventional commits: `type(scope): imperative summary`. Atomic — one logical change each.
-- Feature branches only. Never commit or push directly to `main`; never merge a PR.
-- Stage named paths, not `git add -A`.
-- No AI-authorship trailers in commit messages.
-
-## Environment gotcha
-
-A `GITHUB_TOKEN` in the environment overrides `gh`'s stored accounts and resolves this repo to the
-**wrong GitHub account**. Prefix every `gh` and `git push` call:
-
-```bash
-env -u GITHUB_TOKEN -u GH_TOKEN gh <args>
-```
-
-A `pre-push` hook enforces this; if a push is refused, do not work around it by unsetting the hook.
+- Stage named paths, not `git add -A`; it sweeps unrelated edits into one commit.
+- Run `./mvnw verify` before committing.

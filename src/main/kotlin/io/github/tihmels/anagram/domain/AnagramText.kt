@@ -6,39 +6,17 @@ import java.util.Locale
 /**
  * A text that has passed the normalization contract and is therefore usable as domain input.
  *
- * The contract is applied exactly once, in [of]. Everything downstream works on [normalized]
- * and never re-derives its own rules from [display].
- *
- * Normalization contract:
- *  1. Unicode NFC composition, so that decomposed and precomposed spellings of the same
- *     character compare equal (`"café"` and `"café"` are the same text).
- *  2. Locale-independent lowercasing via [Locale.ROOT], so that the result never depends on
- *     the machine's default locale.
- *  3. Letters, digits and combining marks are significant. Whitespace, punctuation and
- *     symbols are ignored.
- *  4. Iteration happens over code points, not UTF-16 chars, so characters outside the Basic
- *     Multilingual Plane are treated as single characters.
- *
- * Diacritics are deliberately **not** stripped: `é` and `e` are different characters. Folding
- * them together would be a language-dependent decision that this application does not make.
- * Combining marks are kept for the same reason - see [isSignificant].
- *
- * One consequence worth knowing: U+0130 lowercases to `i` plus a combining dot that has no
- * precomposed form, so it is not the same character as a plain `i`. That falls out of keeping
- * marks rather than discarding them, and is covered by a test.
- *
- * A text that carries no letter or digit of its own holds no anagram information and is rejected.
+ * The contract is applied exactly once, in [of], and this is the only place in the codebase that
+ * applies string rules: NFC composition, [Locale.ROOT] lowercasing, letters, digits and combining
+ * marks kept while everything else is ignored, iterated per code point. Diacritics and marks are
+ * deliberately preserved; folding them would be a language-dependent decision this application
+ * does not make. The README states each rule and its consequences, and a test pins each one.
  */
 class AnagramText private constructor(
     /** The text as first entered, whitespace-trimmed. Used for display only. */
     val display: String,
-    /**
-     * The canonical form. Two texts are considered the same input when these are equal.
-     *
-     * Internal on purpose: it is a representation, not part of the text's public identity. Callers
-     * compare [AnagramText] values instead, so no one can grow a second, divergent notion of
-     * "same text" outside this class.
-     */
+    // A representation rather than public identity: callers compare AnagramText values, so no
+    // second notion of "same text" can grow outside this class.
     internal val normalized: String,
 ) {
     internal val signature: AnagramSignature = AnagramSignature.of(normalized)
@@ -58,19 +36,15 @@ class AnagramText private constructor(
          */
         fun of(raw: String): AnagramText? {
             val normalized = normalize(raw)
-            // Emptiness is not the only rejection case. Combining marks are significant, so a
-            // text made only of marks normalizes to something non-empty while still being a
-            // modifier with nothing to modify. Require a letter or digit of its own.
+            // Not merely an emptiness check: marks are significant, so a text of marks alone
+            // normalizes to something non-empty while having nothing of its own to modify.
             if (normalized.codePoints().noneMatch(Character::isLetterOrDigit)) return null
             return AnagramText(raw.trim(), normalized)
         }
 
         private fun normalize(raw: String): String {
-            // NFC runs twice, on purpose. The first pass gives the case mapping composed
-            // characters to work on; the second recomposes what case mapping decomposed, since
-            // some characters lowercase into a letter plus a combining mark
-            // (U+0130 -> "i" + U+0307). NFC also puts combining marks into canonical order, so
-            // the same character always yields the same code points regardless of typing order.
+            // NFC runs twice on purpose: case mapping can decompose what the first pass composed,
+            // since some characters lowercase into a letter plus a mark (U+0130 -> "i" + U+0307).
             val composed = Normalizer.normalize(raw, Normalizer.Form.NFC)
             val cased = Normalizer.normalize(composed.lowercase(Locale.ROOT), Normalizer.Form.NFC)
 
@@ -81,14 +55,8 @@ class AnagramText private constructor(
             return canonical.toString()
         }
 
-        /**
-         * Letters, digits and combining marks carry meaning; everything else is layout.
-         *
-         * Combining marks have to be kept even though they are not letters. In many scripts they
-         * are not decoration but part of the character: dropping U+093E would make the Devanagari
-         * "का" indistinguishable from "क", and dropping a non-composable accent would silently
-         * fold "ạ̈" onto "ạ".
-         */
+        // Marks are kept although they are not letters: in many scripts they are part of the
+        // character, and dropping U+093E would make the Devanagari "का" equal to "क".
         private fun isSignificant(codePoint: Int): Boolean =
             Character.isLetterOrDigit(codePoint) || Character.getType(codePoint) in COMBINING_MARK_TYPES
 
