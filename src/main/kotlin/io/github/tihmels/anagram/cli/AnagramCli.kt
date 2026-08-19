@@ -52,8 +52,10 @@ class AnagramCli(
 
     /** @return `false` when the input stream ended and the loop should stop. */
     private fun compare(): Boolean {
-        val first = readOrReject(prompt("First text:  ") ?: return false) ?: return true
-        val second = readOrReject(prompt("Second text: ") ?: return false) ?: return true
+        val firstLine = prompt("First text:  ") ?: return false
+        val first = readOrReject(firstLine) ?: return true
+        val secondLine = prompt("Second text: ") ?: return false
+        val second = readOrReject(secondLine) ?: return true
 
         emit(
             when (session.compareAndRecord(first, second)) {
@@ -67,7 +69,8 @@ class AnagramCli(
 
     /** @return `false` when the input stream ended and the loop should stop. */
     private fun find(): Boolean {
-        val query = readOrReject(prompt("Text: ") ?: return false) ?: return true
+        val queryLine = prompt("Text: ") ?: return false
+        val query = readOrReject(queryLine) ?: return true
 
         val matches = session.findAnagrams(query)
         if (matches.isEmpty()) {
