@@ -14,6 +14,8 @@ import java.util.Locale
 internal value class AnagramSignature private constructor(private val sortedClusters: String) {
 
     companion object {
+        // Safe as a delimiter only because AnagramText.normalize strips all whitespace before a
+        // signature is ever built, so no cluster can contain it and collide with a boundary.
         private const val CLUSTER_SEPARATOR = " "
 
         /** @param normalized a text already put through the [AnagramText] normalization contract. */
