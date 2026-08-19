@@ -70,7 +70,7 @@ No matches.
 Bye.
 ```
 
-Commands are `compare` (or `1`), `find` (or `2`), `help` and `quit`. Each command asks for its
+Commands are `compare` (or `1`), `find` (or `2`), `help` and `quit` (or `exit`). Each command asks for its
 texts on separate lines rather than parsing them off one line, because texts may contain spaces
 and there is no unambiguous separator that a text could not itself contain.
 
@@ -160,13 +160,14 @@ io.github.tihmels.anagram
 ├── domain
 │   ├── AnagramText       validated input: the normalization contract, applied once
 │   ├── AnagramSignature  canonical character multiset; the lookup key
+│   ├── ComparisonResult  the three outcomes of comparing two texts
 │   └── AnagramSession    the history and the two features
 └── cli
     ├── AnagramCli        command loop, prompts, rendering
     └── AnagramApplication  wires stdin/stdout to the CLI
 ```
 
-Four small types, and the boundary between them is the point:
+Six small types split across two packages, and the boundary between them is the point:
 
 - The **CLI owns no anagram logic.** It never sees a signature and never inspects a normalized
   form. Its single domain responsibility is running raw input through `AnagramText.of`, which is
@@ -204,7 +205,7 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-67 tests, split by what they protect:
+Split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
   digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,
