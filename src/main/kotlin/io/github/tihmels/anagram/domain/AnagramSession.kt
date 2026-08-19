@@ -15,7 +15,7 @@ class AnagramSession {
         }
     }
 
-    /** Recorded texts that are anagrams of [query], in first-seen order, excluding [query] itself. */
+    /** Previously recorded texts that are anagrams of [query], in first-seen order. */
     fun findAnagrams(query: AnagramText): List<AnagramText> =
         bySignature[query.signature]
             .orEmpty()

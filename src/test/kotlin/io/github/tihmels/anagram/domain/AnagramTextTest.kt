@@ -79,8 +79,8 @@ class AnagramTextTest {
 
         @Test
         fun `composes decomposed characters to NFC`() {
-            val precomposed = "caf\u00E9"  // e-acute as a single code point
-            val decomposed = "cafe\u0301"  // e followed by a combining acute accent
+            val precomposed = "caf\u00E9"
+            val decomposed = "cafe\u0301"
             assertEquals(normalize(precomposed), normalize(decomposed))
             assertEquals(4, normalize(decomposed).length, "the accent must compose, not be dropped")
         }
@@ -165,9 +165,9 @@ class AnagramTextTest {
     inner class CodePoints {
 
         // Deseret letters outside the Basic Multilingual Plane: one code point, two UTF-16 chars.
-        private val deseretLongICapital = "\uD801\uDC00"  // U+10400
-        private val deseretLongISmall = "\uD801\uDC28"    // U+10428
-        private val deseretLongESmall = "\uD801\uDC29"    // U+10429
+        private val deseretLongICapital = "\uD801\uDC00"
+        private val deseretLongISmall = "\uD801\uDC28"
+        private val deseretLongESmall = "\uD801\uDC29"
 
         @Test
         fun `a supplementary plane letter counts as one character`() {
@@ -189,7 +189,7 @@ class AnagramTextTest {
         @Test
         fun `orders characters by code point, not by UTF-16 char`() {
             // U+FF41 sorts after U+10428 by code point, but before its high surrogate U+D801 by char.
-            val fullwidthA = "\uFF41"  // U+FF41
+            val fullwidthA = "\uFF41"
             val first = AnagramText.of(fullwidthA + deseretLongISmall)!!
             val second = AnagramText.of(deseretLongISmall + fullwidthA)!!
             assertEquals(
