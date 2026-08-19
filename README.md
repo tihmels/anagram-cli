@@ -204,7 +204,7 @@ None of them would solve a problem this program has.
 ./mvnw test
 ```
 
-67 tests, split by what they protect:
+Split by what they protect:
 
 - `AnagramTextTest` — the normalization contract, rule by rule: casing, whitespace, punctuation,
   digits, NFC composition, the diacritics and combining-mark decisions, rejection of empty input,
