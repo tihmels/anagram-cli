@@ -160,13 +160,14 @@ io.github.tihmels.anagram
 ├── domain
 │   ├── AnagramText       validated input: the normalization contract, applied once
 │   ├── AnagramSignature  canonical character multiset; the lookup key
+│   ├── ComparisonResult  the three outcomes of comparing two texts
 │   └── AnagramSession    the history and the two features
 └── cli
     ├── AnagramCli        command loop, prompts, rendering
     └── AnagramApplication  wires stdin/stdout to the CLI
 ```
 
-Four small types, and the boundary between them is the point:
+Six small types split across two packages, and the boundary between them is the point:
 
 - The **CLI owns no anagram logic.** It never sees a signature and never inspects a normalized
   form. Its single domain responsibility is running raw input through `AnagramText.of`, which is
