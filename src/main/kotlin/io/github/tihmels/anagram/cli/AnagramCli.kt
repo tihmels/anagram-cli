@@ -50,7 +50,6 @@ class AnagramCli(
         }
     }
 
-    /** @return `false` when the input stream ended and the loop should stop. */
     private fun compare(): Boolean {
         val firstLine = prompt("First text:  ") ?: return false
         val first = readOrReject(firstLine) ?: return true
@@ -67,7 +66,6 @@ class AnagramCli(
         return true
     }
 
-    /** @return `false` when the input stream ended and the loop should stop. */
     private fun find(): Boolean {
         val queryLine = prompt("Text: ") ?: return false
         val query = readOrReject(queryLine) ?: return true
@@ -82,14 +80,12 @@ class AnagramCli(
         return true
     }
 
-    /** @return the entered line, or `null` at end of input. */
     private fun prompt(text: String): String? {
         output.write(text)
         output.flush()
         return input.readLine()
     }
 
-    /** @return the parsed text, or `null` after emitting [REJECTED]. */
     private fun readOrReject(line: String): AnagramText? {
         val text = AnagramText.of(line)
         if (text == null) emit(REJECTED)
