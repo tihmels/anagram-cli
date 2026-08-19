@@ -70,7 +70,7 @@ No matches.
 Bye.
 ```
 
-Commands are `compare` (or `1`), `find` (or `2`), `help` and `quit`. Each command asks for its
+Commands are `compare` (or `1`), `find` (or `2`), `help` and `quit` (or `exit`). Each command asks for its
 texts on separate lines rather than parsing them off one line, because texts may contain spaces
 and there is no unambiguous separator that a text could not itself contain.
 

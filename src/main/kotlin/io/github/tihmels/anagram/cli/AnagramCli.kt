@@ -99,7 +99,7 @@ class AnagramCli(
             find    (2)  List the remembered texts that are anagrams of a query. The query
                          itself is not remembered and never appears in its own results.
             help         Show this text.
-            quit         Exit. The history lives in memory only and is lost on exit.
+            quit (exit)  Exit. The history lives in memory only and is lost on exit.
 
             Comparison ignores case, whitespace and punctuation; accented letters are kept
             distinct from their unaccented counterparts.
