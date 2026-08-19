@@ -30,8 +30,9 @@ printf 'compare\nlisten\nsilent\nfind\nlisten\nquit\n' | java -jar target/anagra
 ## Code style
 
 - `-Werror` is on. A Kotlin warning fails the build; fix it rather than suppressing it.
-- Comments explain *why*, never *what*. Domain types carry KDoc stating their contract; that KDoc
-  is the specification, so update it in the same change as the behaviour.
+- Comments explain *why*, never *what*. Give a domain type KDoc when its contract isn't obvious
+  from its name and signature alone; that KDoc is the specification, so update it in the same
+  change as the behaviour.
 - Public domain API returns explicit types over booleans when there is a third case to report.
   `compareAndRecord` returns `ComparisonResult`, not `Boolean`, so `SAME_TEXT` stays distinct from
   `NOT_ANAGRAMS`.
@@ -55,8 +56,9 @@ io.github.tihmels.anagram
 ```
 
 - **The normalization contract lives only in `AnagramText.of`.** Never lowercase, trim, strip or
-  compare strings anywhere else. If a rule needs changing, change it there and update the tests
-  and the README table that pin it.
+  compare *user-entered text* anywhere else — that's separate from parsing CLI command keywords
+  like `compare`/`find`/`quit`. If a rule needs changing, change it there and update the tests and
+  the README table that pin it.
 - **The CLI owns no anagram logic.** It may call `AnagramText.of` to validate input; it must not
   read `normalized` or touch `AnagramSignature`.
 - **The domain owns no I/O.** `AnagramCli` takes a `Reader` and `Writer` by constructor — keep it
