@@ -152,8 +152,8 @@ class AnagramTextTest {
             // other consonant \u2014 the pairing between mark and base has changed.
             val kaAaKhaE = AnagramText.of("\u0915\u093E\u0916\u0947")!!
             val kaEKhaAa = AnagramText.of("\u0915\u0947\u0916\u093E")!!
-            assertNotEquals(
-                ComparisonResult.ANAGRAMS,
+            assertEquals(
+                ComparisonResult.NOT_ANAGRAMS,
                 AnagramSession().compareAndRecord(kaAaKhaE, kaEKhaAa),
                 "a mark moving to a different base character must not be reported as a reordering",
             )
