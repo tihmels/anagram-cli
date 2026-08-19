@@ -18,23 +18,36 @@ class AnagramCli(
         emit(BANNER)
         var running = true
         while (running) {
-            val command = (prompt(COMMAND_PROMPT) ?: break).trim()
-            running = when (command.lowercase(Locale.ROOT)) {
-                "" -> true
-                "1", "compare" -> compare()
-                "2", "find" -> find()
-                "help" -> {
+            val line = prompt(COMMAND_PROMPT) ?: break
+            running = when (val command = parse(line)) {
+                ParsedCommand.Empty -> true
+                ParsedCommand.Compare -> compare()
+                ParsedCommand.Find -> find()
+                ParsedCommand.Help -> {
                     emit(HELP)
                     true
                 }
-                "quit", "exit" -> false
-                else -> {
-                    emit("Unknown command '$command'. Type 'help' to see the available commands.")
+                ParsedCommand.Quit -> false
+                is ParsedCommand.Unknown -> {
+                    emit("Unknown command '${command.raw}'. Type 'help' to see the available commands.")
                     true
                 }
             }
         }
         emit("Bye.")
+    }
+
+    /** Resolves raw input to a closed set of intents, so dispatch in [run] is exhaustive. */
+    private fun parse(raw: String): ParsedCommand {
+        val trimmed = raw.trim()
+        return when (trimmed.lowercase(Locale.ROOT)) {
+            "" -> ParsedCommand.Empty
+            "1", "compare" -> ParsedCommand.Compare
+            "2", "find" -> ParsedCommand.Find
+            "help" -> ParsedCommand.Help
+            "quit", "exit" -> ParsedCommand.Quit
+            else -> ParsedCommand.Unknown(trimmed)
+        }
     }
 
     /** @return `false` when the input stream ended and the loop should stop. */
@@ -105,4 +118,14 @@ class AnagramCli(
             distinct from their unaccented counterparts.
         """.trimIndent()
     }
+}
+
+/** The result of resolving one line of raw input against [AnagramCli]'s command names. */
+private sealed interface ParsedCommand {
+    object Empty : ParsedCommand
+    object Compare : ParsedCommand
+    object Find : ParsedCommand
+    object Help : ParsedCommand
+    object Quit : ParsedCommand
+    data class Unknown(val raw: String) : ParsedCommand
 }
